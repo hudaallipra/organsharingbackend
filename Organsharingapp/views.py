@@ -1,14 +1,23 @@
 from django.shortcuts import render
 from django.views import View
+from django.http.response import HttpResponse
 
 # Create your views here.
 
 
 
 
-class Login(View):
-    def get(Self,Request):
-        return render(Request,'administrator/login.html')
+class Loginpage(View):
+    def get(self,request):
+     return render(request,'administrator/login.html')
+    def get(self,request):
+        return render(request,'login.html')
+    def post(self,request):
+        username=request.POST['username']
+        password=request.POST['possword']
+        login_obj=LoginTable.objects.get(Username=username,Password=password)
+        if login_obj.Type=="admin":
+            return HttpResponse('''<script>alert("welcome to");window.loction=/viewdepartment</script>''')
     
 class AddDoc(View):
     def get(Self,Request):
@@ -66,24 +75,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Login
-from .serializers import LoginSerializer
+from .serializers import Loginserializer, Loginserializer, PatientListserializer, Userserializer
 
 class LoginAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 login = Login.objects.get(pk=pk)
-                serializer = LoginSerializer(login)
+                serializer = Loginserializer(login)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Login.DoesNotExist:
                 return Response({'error': 'Login not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             logins = Login.objects.all()
-            serializer = LoginSerializer(logins, many=True)
+            serializer = Loginserializer(logins, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
+        serializer = Loginserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -95,7 +104,7 @@ class LoginAPIView(APIView):
         except Login.DoesNotExist:
             return Response({'error': 'Login not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = LoginSerializer(login, data=request.data, partial=True)
+        serializer = Loginserializer(login, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -113,24 +122,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Doctor
-from .serializers import DoctorSerializer
+from .serializers import Doctorserializer
 
 class DoctorAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 doctor = Doctor.objects.get(pk=pk)
-                serializer = DoctorSerializer(doctor)
+                serializer = Doctorserializer(doctor)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Doctor.DoesNotExist:
                 return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             doctors = Doctor.objects.all()
-            serializer = DoctorSerializer(doctors, many=True)
+            serializer = Doctorserializer(doctors, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = DoctorSerializer(data=request.data)
+        serializer = Doctorserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -142,7 +151,7 @@ class DoctorAPIView(APIView):
         except Doctor.DoesNotExist:
             return Response({'error': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = DoctorSerializer(doctor, data=request.data, partial=True)
+        serializer = Doctorserializer(doctor, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -160,24 +169,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import User
-from .serializers import UserSerializer
+from .serializers import Userserializer
 
 class UserAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 user = User.objects.get(pk=pk)
-                serializer = UserSerializer(user)
+                serializer = Userserializer(user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except User.DoesNotExist:
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             users = User.objects.all()
-            serializer = UserSerializer(users, many=True)
+            serializer = Userserializer(users, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = UserSerializer(data=request.data)
+        serializer = Userserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -189,7 +198,7 @@ class UserAPIView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        serializer = Userserializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -207,24 +216,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import PatientList
-from .serializers import PatientListSerializer
+from .serializers import PatientListserializer
 
 class PatientListAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 patient = PatientList.objects.get(pk=pk)
-                serializer = PatientListSerializer(patient)
+                serializer = PatientListserializer(patient)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except PatientList.DoesNotExist:
                 return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             patients = PatientList.objects.all()
-            serializer = PatientListSerializer(patients, many=True)
+            serializer = PatientListserializer(patients, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = PatientListSerializer(data=request.data)
+        serializer = PatientListserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -236,7 +245,7 @@ class PatientListAPIView(APIView):
         except PatientList.DoesNotExist:
             return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = PatientListSerializer(patient, data=request.data, partial=True)
+        serializer = PatientListserializer(patient, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -254,24 +263,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import OrganDonation
-from .serializers import OrganDonationSerializer
+from .serializers import OrganDonationserializer
 
 class OrganDonationAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 donation = OrganDonation.objects.get(pk=pk)
-                serializer = OrganDonationSerializer(donation)
+                serializer = OrganDonationserializer(donation)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except OrganDonation.DoesNotExist:
                 return Response({'error': 'Donation record not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             donations = OrganDonation.objects.all()
-            serializer = OrganDonationSerializer(donations, many=True)
+            serializer = OrganDonationserializer(donations, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = OrganDonationSerializer(data=request.data)
+        serializer = OrganDonationserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -283,7 +292,7 @@ class OrganDonationAPIView(APIView):
         except OrganDonation.DoesNotExist:
             return Response({'error': 'Donation record not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = OrganDonationSerializer(donation, data=request.data, partial=True)
+        serializer = OrganDonationserializer(donation, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -301,24 +310,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import OrganRequest
-from .serializers import OrganRequestSerializer
+from .serializers import OrganRequestserializer
 
 class OrganRequestAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 request_obj = OrganRequest.objects.get(pk=pk)
-                serializer = OrganRequestSerializer(request_obj)
+                serializer = OrganRequestserializer(request_obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except OrganRequest.DoesNotExist:
                 return Response({'error': 'Organ request not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             requests = OrganRequest.objects.all()
-            serializer = OrganRequestSerializer(requests, many=True)
+            serializer = OrganRequestserializer(requests, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = OrganRequestSerializer(data=request.data)
+        serializer = OrganRequestserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -330,7 +339,7 @@ class OrganRequestAPIView(APIView):
         except OrganRequest.DoesNotExist:
             return Response({'error': 'Organ request not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = OrganRequestSerializer(request_obj, data=request.data, partial=True)
+        serializer = OrganRequestserializer(request_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -349,24 +358,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Appointment
-from .serializers import AppointmentSerializer
+from .serializers import Appointmentserializer
 
 class AppointmentAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 appointment = Appointment.objects.get(pk=pk)
-                serializer = AppointmentSerializer(appointment)
+                serializer = Appointmentserializer(appointment)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Appointment.DoesNotExist:
                 return Response({'error': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             appointments = Appointment.objects.all()
-            serializer = AppointmentSerializer(appointments, many=True)
+            serializer = Appointmentserializer(appointments, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = AppointmentSerializer(data=request.data)
+        serializer = Appointmentserializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -378,7 +387,7 @@ class AppointmentAPIView(APIView):
         except Appointment.DoesNotExist:
             return Response({'error': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+        serializer = Appointmentserializer(appointment, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -391,3 +400,54 @@ class AppointmentAPIView(APIView):
             return Response({'message': 'Appointment deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Appointment.DoesNotExist:
             return Response({'error': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+from rest_framework.views import APIView
+
+class DonorRegistrationApi(APIView):
+    print("*****")
+    def post(self, request):
+        print("###############",request.data)
+        user_serial =  Userserializer(data=request.data)
+        login_serial = Loginserializer(data=request.data)
+        data_valid = user_serial.is_valid()
+        login_valid = login_serial.is_valid()
+        print("---dta------>", data_valid)
+        print("---login------>", login_valid)
+        if data_valid and login_valid:
+            print("------------>")
+            login_profile = login_serial.save(user_type='donar')
+            user_serial.save(login_page=login_profile)
+            return Response(user_serial.data, status=status.HTTP_201_CREATED)
+        return Response({'login_error': login_serial.errors if not login_valid else None,
+                         'user_error': user_serial.errors if not data_valid else None}, status=status.HTTP_400_BAD_REQUEST)
+
+
+from rest_framework.permissions import AllowAny
+from rest_framework.status import HTTP_200_OK
+
+
+class LoginPageApi(APIView):
+    def post(self, request):
+        response_dict= {}
+        password = request.data.get("password")
+        print("Password ------------------> ",password)
+        username = request.data.get("username")
+        print("Username ------------------> ",username)
+        try:
+            user = Login.objects.filter(username=username, password=password).first()
+            print("user_obj :-----------", user)
+        except Login.DoesNotExist:
+            response_dict["message"] = "No account found for this username. Please signup."
+            return Response(response_dict, HTTP_200_OK)
+      
+        if user.Type == "donor":
+            response_dict = {
+                "login_id": str(user.id),
+                "user_type": user.Type,
+                "status": "success",
+            }   
+            print("User details :--------------> ",response_dict)
+            return Response(response_dict, HTTP_200_OK)
+        else:
+            response_dict["message "] = "Your account has not been approved yet or you are a CLIENT user."
+            return Response(response_dict, HTTP_200_OK)

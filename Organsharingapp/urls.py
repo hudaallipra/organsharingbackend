@@ -4,7 +4,7 @@ from django.urls import include, path
 from .views import *
 
 urlpatterns = [
-    path('login', Login.as_view(), name='login'),
+    path('login', Loginpage.as_view(), name='login'),
     path('add doctor',AddDoc.as_view(),name='add doctor'),
     path('view doctor',ViewDoc.as_view(),name='view doctor'),
     path('organ request',ViewOrgReq.as_view(),name='organ request'),
