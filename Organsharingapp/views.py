@@ -71,6 +71,11 @@ class DocDash(View):
     def get(Self,Request):
         return render(Request,'doctor/doctor dashboard.html')         
     
+
+    # ..........................................................api
+
+
+    
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
