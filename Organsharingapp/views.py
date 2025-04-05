@@ -59,9 +59,9 @@ class OrganCo(View):
     def get(Self,Request):
         return render(Request,'doctor/organ collection.html')    
     
-class PatientList(View):
-    def get(Self,Request):
-        return render(Request,'doctor/patient list.html')
+# class PatientList(View):
+#     def get(Self,Request):
+#         return render(Request,'doctor/patient list.html')
 
 class Sched(View):
     def get(Self,Request):

@@ -14,7 +14,7 @@ urlpatterns = [
     path('admin dashboard', AdminDash.as_view(), name='admin dashboard'),
     path('new request', NewReq.as_view(), name='new request'),
     path('organ collection', OrganCo.as_view(), name='organ collection'),
-    path('patient list', PatientList.as_view(), name='patient list'),
+    # path('patient list', PatientList.as_view(), name='patient list'),
     path('schedule appointments', Sched.as_view(), name='schedule appointments'),
     path('doctor dashboard', DocDash.as_view(), name='doctor dashboard'),
 
