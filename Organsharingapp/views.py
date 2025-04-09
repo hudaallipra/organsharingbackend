@@ -427,11 +427,12 @@ class AppointmentAPIView(APIView):
             return Response({'message': 'Appointment deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
         except Appointment.DoesNotExist:
             return Response({'error': 'Appointment not found'}, status=status.HTTP_404_NOT_FOUND)
+#views.py
         
 from rest_framework.views import APIView
 
 class DonorRegistrationApi(APIView):
-    print("*****")
+    print("*")
     def post(self, request):
         print("###############",request.data)
         data={}
@@ -467,9 +468,9 @@ class LoginPageApi(APIView):
         username = request.data.get("username")
         print("Username ------------------> ",username)
         try:
-            user = Logintable.objects.filter(username=username, password=password).first()
+            user = Login.objects.filter(username=username, password=password).first()
             print("user_obj :-----------", user)
-        except Logintable.DoesNotExist:
+        except Login.DoesNotExist:
             response_dict["message"] = "No account found for this username. Please signup."
             return Response(response_dict, HTTP_200_OK)
       
@@ -484,3 +485,141 @@ class LoginPageApi(APIView):
         else:
             response_dict["message "] = "Your account has not been approved yet or you are a CLIENT user."
             return Response(response_dict, HTTP_200_OK)
+        
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Organ, OrganDonation
+ # create this for user details
+
+class organ_donor_list(APIView):
+    def get(self,request):
+        data = []
+
+        organs = Organ.objects.all()
+
+        for organ in organs:
+            donations = OrganDonation.objects.filter(organ_type=organ)
+
+            donors = []
+            for donation in donations:
+                user = donation.user_id
+                donors.append({
+                    'id': user.id,
+                    "user_name": user.user_name,
+                    "age": user.age,
+                    "email": user.email,
+                    "phone_number": user.phone_number,
+                    "profile_image":request.build_absolute_uri(user.profile_image.url) if user.profile_image else None,
+                    "address":user.address,
+                    "gender":user.gender,
+                    "bloodgroup":user.bloodgroup,
+
+
+                    
+                    # add other user fields as required
+                })
+
+            data.append({
+                "category": organ.organ_name,
+                "categoryid":organ.id,
+                "donors": donors
+            })
+
+        return Response(data)
+    
+# class vieworgans(APIView):
+#     def get(self,request):
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import OrganDonation
+from .serializers import OrganDonationSerializer
+
+
+class OrganDonationAPI(APIView):
+
+    def get(self, request):
+        donations = OrganDonation.objects.all()
+        serializer = OrganDonationSerializer(donations, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        print(request.data)
+        data={}
+        data=request.data
+        data['user_id']=Usertable.objects.get(Login_id__id=request.data.get('user_id')).id
+
+        serializer = OrganDonationSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        try:
+            donation = OrganDonation.objects.get(pk=pk)
+        except OrganDonation.DoesNotExist:
+            return Response({'error': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = OrganDonationSerializer(donation, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            donation = OrganDonation.objects.get(pk=pk)
+        except OrganDonation.DoesNotExist:
+            return Response({'error': 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+
+        donation.delete()
+        return Response({'message': 'Deleted Successfully'}, status=status.HTTP_204_NO_CONTENT)
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import OrganRequest
+from .serializers import OrganRequestSerializer
+
+
+class OrganRequestAPIView(APIView):
+
+    def get(self, request):
+        
+        organ_requests = OrganRequest.objects.all()
+        serializer = OrganRequestSerializer(organ_requests, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        print(request.data)
+        data={}
+        data=request.data
+        data['patient_id']=Usertable.objects.get(Login_id__id=request.data.get('patient_id')).id
+
+        serializer = OrganRequestSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, pk):
+        try:
+            organ_request = OrganRequest.objects.get(id=pk)
+        except OrganRequest.DoesNotExist:
+            return Response({"error": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = OrganRequestSerializer(organ_request, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        try:
+            organ_request = OrganRequest.objects.get(id=pk)
+        except OrganRequest.DoesNotExist:
+            return Response({"error": "Not Found"}, status=status.HTTP_404_NOT_FOUND)
+
+        organ_request.delete()
+        return Response({"message": "Deleted Successfully"}, status=status.HTTP_204_NO_CONTENT)

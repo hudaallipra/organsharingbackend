@@ -28,5 +28,12 @@ urlpatterns = [
     path('organrequestapi', OrganRequestAPIView.as_view(), name='organrequestapi'),  # fixed typo in 'name'
     path('appointmentapi', AppointmentAPIView.as_view(), name='appointment'),
     path('donorregistrationapi',DonorRegistrationApi.as_view(),name='DonorRegistrationApi'),
-    path('loginapi',LoginPageApi.as_view(),name='LoginPageApi')
+    path('loginapi',LoginPageApi.as_view(),name='LoginPageApi'),
+    #urls.py
+path('orgondonerlist', organ_donor_list.as_view(), name='organ-donor-list'),
+    # path('vieworgans',vieworgans.as_view(),name='vieworgans')
+    path('organdonation', OrganDonationAPI.as_view()),  # GET & POST
+    path('organdonation/<int:pk>', OrganDonationAPI.as_view()),  
+    path('organrequest', OrganRequestAPIView.as_view()),  # for get & post
+    path('organrequest/<int:pk>', OrganRequestAPIView.as_view()),  # for put & delete
 ]
