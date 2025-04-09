@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http.response import HttpResponse
+from .forms import *
 
 # Create your views here.
 
@@ -10,26 +11,41 @@ from django.http.response import HttpResponse
 class Loginpage(View):
     def get(self,request):
      return render(request,'administrator/login.html')
-    def get(self,request):
-        return render(request,'login.html')
     def post(self,request):
         username=request.POST['username']
         password=request.POST['possword']
-        login_obj=LoginTable.objects.get(Username=username,Password=password)
-        if login_obj.Type=="admin":
-            return HttpResponse('''<script>alert("welcome to");window.loction=/viewdepartment</script>''')
-    
+        try:
+            login_obj=Login.objects.get(Username=username,Password=password)
+            request.session['userid']=login_obj.id
+            if login_obj.user_type=="admin":
+                return HttpResponse('''<script>alert("welcome to");window.loction=/viewdepartment</script>''')
+            elif login_obj.user_type=="doctor":
+                return HttpResponse('''<script>alert("welcome to");window.loction=/viewdepartment</script>''')
+        except Login.DoesNotExist:
+            return HttpResponse('''<script>alert("invalid username or password");window.loction=/</script>''')
 class AddDoc(View):
     def get(Self,Request):
         return render(Request,'administrator/add doctor.html')
+    def post(self,request):
+        form=DoctorForm(request.POST)
+        if form.is_valid():
+            user=Login.objects.create(username=request.POST['username'],password=request.POST['password'],user_type='doctor')
+            doc=form.save(commit=False)
+            doc.doctor_id=user
+            doc.save()
+            return HttpResponse('''<script>alert("doctor added successfully");window.loction=/viewdepartment</script>''')
 
 class ViewDoc(View):
     def get(Self,Request):
-        return render(Request,'administrator/view doctor.html')
+        doc=Doctor.objects.all()
+        return render(Request,'administrator/view doctor.html',{'doc':doc})
+
     
 class ViewOrgReq(View):
     def get(Self,Request):
-        return render(Request,'administrator/organ request.html')
+        orgreq=OrganRequest.objects.all()
+        return render(Request,'administrator/view org req.html',{'orgreq':orgreq})
+        
     
 class AssignDoc(View):
     def get(Self,Request):
@@ -37,7 +53,9 @@ class AssignDoc(View):
     
 class ViewOrgDon(View):
     def get(Self,Request):
-        return render(Request,'administrator/view organ donation.html')
+        orgdon=OrganDonation.objects.all()
+        return render(Request,'administrator/view org don.html',{'orgdon':orgdon})
+        
 
 class ManageHosLoc(View):
     def get(Self,Request):
@@ -45,7 +63,9 @@ class ManageHosLoc(View):
     
 class ViewUserDet(View):
     def get(Self,Request):
-        return render(Request,'administrator/view user details.html')
+        userdet=User.objects.all()
+        return render(Request,'administrator/view user det.html',{'userdet':userdet})
+
     
 class AdminDash(View):
     def get(Self,Request):
@@ -412,16 +432,21 @@ class DonorRegistrationApi(APIView):
     print("*****")
     def post(self, request):
         print("###############",request.data)
+        data={}
+        data=request.data
+        data['username']=request.data.get('email')
+        print(data)
+
         user_serial =  Userserializer(data=request.data)
-        login_serial = Loginserializer(data=request.data)
+        login_serial = Loginserializer(data=data)
         data_valid = user_serial.is_valid()
         login_valid = login_serial.is_valid()
         print("---dta------>", data_valid)
         print("---login------>", login_valid)
         if data_valid and login_valid:
             print("------------>")
-            login_profile = login_serial.save(user_type='donar')
-            user_serial.save(login_page=login_profile)
+            login_profile = login_serial.save(user_type='donor')
+            user_serial.save(Login_id=login_profile)
             return Response(user_serial.data, status=status.HTTP_201_CREATED)
         return Response({'login_error': login_serial.errors if not login_valid else None,
                          'user_error': user_serial.errors if not data_valid else None}, status=status.HTTP_400_BAD_REQUEST)
@@ -433,6 +458,7 @@ from rest_framework.status import HTTP_200_OK
 
 class LoginPageApi(APIView):
     def post(self, request):
+        print(request.data)
         response_dict= {}
         password = request.data.get("password")
         print("Password ------------------> ",password)
@@ -445,10 +471,10 @@ class LoginPageApi(APIView):
             response_dict["message"] = "No account found for this username. Please signup."
             return Response(response_dict, HTTP_200_OK)
       
-        if user.Type == "donor":
+        if user.user_type == "donor":
             response_dict = {
                 "login_id": str(user.id),
-                "user_type": user.Type,
+                "user_type": user.user_type,
                 "status": "success",
             }   
             print("User details :--------------> ",response_dict)

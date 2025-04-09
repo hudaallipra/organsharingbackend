@@ -3,7 +3,7 @@ from .views import *
 
 urlpatterns = [
     # Web page views
-    path('login', Loginpage.as_view(), name='login'),
+    path('', Loginpage.as_view(), name='login'),
     path('add doctor', AddDoc.as_view(), name='add doctor'),
     path('view doctor', ViewDoc.as_view(), name='view doctor'),
     path('organ request', ViewOrgReq.as_view(), name='organ request'),
@@ -19,11 +19,13 @@ urlpatterns = [
     path('doctor dashboard', DocDash.as_view(), name='doctor dashboard'),
 
     # API endpoints
-    path('loginapi', LoginAPIView.as_view(), name='loginapi'),
+    path('LoginPageApi', LoginAPIView.as_view(), name='loginapi'),
     path('doctorapi', DoctorAPIView.as_view(), name='doctorapi'),
     path('userapi', UserAPIView.as_view(), name='userapi'),
     path('patientlistapi', PatientListAPIView.as_view(), name='patientlistapi'),
     path('organdonationapi', OrganDonationAPIView.as_view(), name='organdonationapi'),
     path('organrequestapi', OrganRequestAPIView.as_view(), name='organrequestapi'),  # fixed typo in 'name'
     path('appointmentapi', AppointmentAPIView.as_view(), name='appointment'),
+    path('donorregistrationapi',DonorRegistrationApi.as_view(),name='DonorRegistrationApi'),
+    path('loginapi',LoginPageApi.as_view(),name='LoginPageApi')
 ]
