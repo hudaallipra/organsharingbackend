@@ -15,27 +15,27 @@
 
             <div class="mb-3">
                 <label for="doctorName" class="form-label">Doctor Name</label>
-                <input type="text" class="form-control" id="doctorName" name="doctor_name" required>
+                <input type="text" class="form-control" id="doctorName" name="doctor_name" value="{{doc.doctor_name}}" required>
             </div>
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+                <input type="email" class="form-control" id="email" name="email" value="{{doc.email}}" required>
             </div>
             <div class="mb-3">
                 <label for="specialization" class="form-label">Specialization</label>
-                <input type="text" class="form-control" id="specialization" name="specialization" required>
+                <input type="text" class="form-control" id="specialization" name="specialization" value="{{doc.specialization}}" required>
             </div>
             <div class="mb-3">
                 <label for="phoneNumber" class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" id="phoneNumber" name="phone" required>
+                <input type="tel" class="form-control" id="phoneNumber" name="phone" value="{{doc.phone}}" required>
             </div>
             <div class="mb-3">
                 <label for="hospitalName" class="form-label">Hospital Name</label>
-                <input type="text" class="form-control" id="hospitalName" name="hospital" required>
+                <input type="text" class="form-control" id="hospitalName" name="hospital" value="{{doc.hospital}}" required>
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="text" class="form-control" id="password" name="password" required>
+                <input type="text" class="form-control" id="password" name="password" value="{{doc.doctor_id.password}}" required>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>

@@ -13,21 +13,31 @@
     <table class="table table-dark table-striped-columns mt-5 style="width:800px">
   <thead>
     <tr>
+      
       <th scope="col">doctor id</th>
       <th scope="col">doctor name</th>
-      <th scope="col">doctor department</th>
+      <th scope="col">Specialization</th>
       <th scope="col">hospital</th>
-      <th scope="col">phone number</th>
+      <th scope="col">email</th>
+      <th scope="col">phone</th>
+      <th scope="col">Actions</th>
     </tr>
   </thead>
   <tbody>
+    {% for i in doc %}
     <tr>
-      <th scope="row">1</th>
-      <td></td>
-      <td></td>
-      <td></td>
-      <td></td>
+      <th scope="row">{{forloop.counter}}</th>
+      <td>{{i.doctor_name}}</td>
+      
+      <td>{{i.specialization}}</td>
+      <td>{{i.hospital}}</td>
+      <td>{{i.email}}</td>
+      <td>{{i.phone}}</td>
+      <td><a href="{% url  'editdoctor' i.id %}"><button>edit</button></a>
+      <a href="{% url 'DeleteDoc' i.id %}"><button>delete</button></a>
+      </td>
     </tr>
+    {% endfor %}
     
     </tr>
     

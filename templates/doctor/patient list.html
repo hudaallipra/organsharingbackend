@@ -18,27 +18,29 @@
           <th scope="col">blood group</th>
           <th scope="col">age</th>
           <th scope="col">gender</th>
-          <th scope="col">organ type</th>
-          <th scope="col">role</th>
-          <th scope="col">email id</th>
-          <th scope="col">phone number</th>
+          
+          
+          <th scope="col">email</th>
+          <th scope="col">phone</th>
           
           
         </tr>
       </thead>
       <tbody>
+        {% for i in userdet%}
         <tr>
-          <th scope="row">1</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-         
           
+          <td>{{i.Login_id.id}}</td>
+          <td>{{i.user_name}}</td>
+          <td>{{i.blood_group}}</td>
+          <td>{{i.age}}</td>
+          <td>{{i.gender}}</td>
+         
+          <td>{{i.email}}</td>
+          <td>{{i.phone_number}}</td>
+          
+         
+          {% endfor %}
         </tr>
         
       </tbody>

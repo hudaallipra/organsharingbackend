@@ -10,14 +10,15 @@
     <div class="container-fluid">
     <div class="card">
         <h2 class="h2 mb-4" style="text-align: center">login</h2>
-    <form>
+    <form action="" method="post">
+        {% csrf_token %}
         <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="Username" aria-label="Username">
+            <input type="text" class="form-control" placeholder="Username" name="username" aria-label="Username">
             <span class="input-group-text">@</span>
             
           </div>
           <div class="input-group mb-3">
-            <input type="text" class="form-control" placeholder="password" aria-label="password">
+            <input type="text" class="form-control" placeholder="password" name="password" aria-label="password">
             <span class="input-group-text">🔒</span>
             
           </div>

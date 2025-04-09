@@ -14,27 +14,28 @@
       <thead>
         <tr>
           <th scope="col">id</th>
-          <th scope="col">doner name</th>
-          <th scope="col">hospital name</th>
-          <th scope="col">doctor name</th>
+          <th scope="col">patient name</th>
+          
           <th scope="col">organ type</th>
           <th scope="col">blood group</th>
-          <th scope="col">doner phone number</th>
+          <th scope="col">phone number</th>
           <th scope="col">action</th>
           
         </tr>
       </thead>
       <tbody>
+        {% for i in orgdon%}
         <tr>
-          <th scope="row">1</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          
+          <td>{{i.user_id.id}}</td>
+          <td>{{i.user_id.user_name}}</td>
+          
+          <td>{{i.organ_type.organ_name}}</td>
+          <td>{{i.user_id.blood_group}}</td>
+          <td>{{i.user_id.phone_number}}</td>
           <td>
         <a href="#" class="btn btn-success">submit</a>
+        {% endfor %}
 
           </td>
           

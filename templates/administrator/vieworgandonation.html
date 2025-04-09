@@ -16,25 +16,25 @@
           <th scope="col">patient id</th>
           <th scope="col">patient name</th>
           <th scope="col">organ</th>
-          <th scope="col">hospital</th>
+          
           <th scope="col">blood group</th>
-          <th scope="col">number</th>
-          <th scope="col">status</th>
+          <th scope="col">phone</th>
           
         </tr>
       </thead>
       <tbody>
+        {% for i in orgdon %}
         <tr>
-          <th scope="row">1</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
+          <td>{{i.user_id.id}}</td>
+          <td>{{i.user_id.user_name}}</td>
+          <td>{{i.organ_type.organ_name}}</td>
+          <td>{{i.user_id.blood_group}}</td>
+          <td>{{i.user_id.phone_number}}</td>
+          
 
 
         </tr>
+        {% endfor %}
         
         </tr>
         

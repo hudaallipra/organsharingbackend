@@ -17,28 +17,27 @@
         <th scope="col">blood group</th>
         <th scope="col">gender</th>
         <th scope="col">age</th>
-        <th scope="col">hospital name</th>
-        <th scope="col">location</th>
+        
         <th scope="col"></th>
         
 
       </tr>
     </thead>
     <tbody>
+      {% for i in org%}
       <tr>
-        <th scope="row">1</th>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
+        <td>{{i.patient_id.id}}</td>
+        <td>{{i.patient_id.user_name}}</td>
+        <td>{{i.organ_id.organ_type.organ_name}}</td>
+        <td>{{i.patient_id.blood_group}}</td>
+        <td>{{i.patient_id.gender}}</td>
+        <td>{{i.patient_id.age}}</td>
+        
         <td></td>
 
 
       </tr>
+      {% endfor %}
       
       </tr>
       

@@ -19,24 +19,24 @@
           <th scope="col">blood group</th>
           <th scope="col">age</th>
           <th scope="col">gender</th>
-          <th scope="col">action</th>
+
         </tr>
       </thead>
       <tbody>
+        {% for i in orgreq %}
         <tr>
-          <th scope="row">1</th>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td>
-            <a href="#" class="btn btn-success">update</a>
-          </td>
+          
+          <td>{{i.patient_id.id}}</td>
+          <td>{{i.patient_id.user_name}}</td>
+          <td>{{i.organ_id.organ_type.organ_name}}</td>
+          <td>{{i.patient_id.blood_group}}</td>
+          <td>{{i.patient_id.age}}</td>
+          <td>{{i.patient_id.gender}}</td>
+
         </tr>
         
         </tr>
-        
+        {% endfor %}
       </tbody>
     </table>
     </div>  

@@ -51,11 +51,10 @@
         <div class="sidebar">
             <h4 class="text-center">Organ sharing</h4>
             <a href="#">Home</a>
-            <a href="#">New Organ Request</a>
-            <a href="#">Organ Collection</a>
-            <a href="#">Patient List</a>
-            <a href="#">Schedule Appointments</a>
-            <a href="#">logout</a>
+            <a href="{%url 'new request' %}">New Organ Request</a>
+            <a href="{% url 'organ collection' %}">Organ Collection</a>
+            <a href="{% url 'patient list'%}">Patient List</a>
+            <a href="/">logout</a>
         </div>
 
         <!-- Content Area -->

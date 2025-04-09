@@ -55,13 +55,12 @@
         <div class="sidebar">
             <h4 class="text-center">Organ sharing</h4>
             <a href="#">Home</a>
-            <a href="#">Add Doctor</a>
-            <a href="#">View Doctors</a>
-            <a href="#">View Organ Requests</a>
-            <a href="#">View Organ Donations</a>
-            <a href="#">Manage Hospital Location</a>
-            <a href="#">View User Details</a>
-            <a href="#">Logout</a>
+            <a href="{% url 'adddoctor' %}">Add Doctor</a>
+            <a href="{% url 'viewdoctor' %}">View Doctors</a>
+            <a href="{% url 'organ request' %}">View Organ Requests</a>
+            <a href="{% url 'view organ donation' %}">View Organ Donations</a>
+            <a href="{% url 'view user details' %}">View User Details</a>
+            <a href="/">Logout</a>
         </div>
 
         <!-- Content Area -->

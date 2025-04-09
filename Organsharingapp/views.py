@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.views import View
 from django.http.response import HttpResponse
 from .forms import *
@@ -13,28 +13,70 @@ class Loginpage(View):
      return render(request,'administrator/login.html')
     def post(self,request):
         username=request.POST['username']
-        password=request.POST['possword']
+        password=request.POST['password']
+        print(username,password)
         try:
-            login_obj=Login.objects.get(Username=username,Password=password)
+            print("hhhhh")
+            login_obj=Logintable.objects.get(username=username,password=password)
+            print(login_obj)
             request.session['userid']=login_obj.id
             if login_obj.user_type=="admin":
-                return HttpResponse('''<script>alert("welcome to");window.loction=/viewdepartment</script>''')
+                print("gggg")
+                return render(request,'administrator/admindashboard.html')
+               
             elif login_obj.user_type=="doctor":
-                return HttpResponse('''<script>alert("welcome to");window.loction=/viewdepartment</script>''')
-        except Login.DoesNotExist:
-            return HttpResponse('''<script>alert("invalid username or password");window.loction=/</script>''')
+                return redirect('doctor dashboard')
+                
+        except Logintable.DoesNotExist:
+            return HttpResponse('''<script>alert("invalid username or password");window.location=/</script>''')
 class AddDoc(View):
     def get(Self,Request):
         return render(Request,'administrator/add doctor.html')
     def post(self,request):
         form=DoctorForm(request.POST)
         if form.is_valid():
-            user=Login.objects.create(username=request.POST['username'],password=request.POST['password'],user_type='doctor')
+            user=Logintable.objects.create(username=request.POST['email'],password=request.POST['password'],user_type='doctor')
             doc=form.save(commit=False)
             doc.doctor_id=user
             doc.save()
-            return HttpResponse('''<script>alert("doctor added successfully");window.loction=/viewdepartment</script>''')
+            
+        return HttpResponse('''<script>alert("Doctor added successfully");window.location='/viewdoctor';</script>''')
 
+class DeleteDoc(View):
+    def get(Self,Request,id):
+        doc=Doctor.objects.get(id=id)
+        doc.delete()
+        return HttpResponse('''<script>alert("Doctor deleted successfully");window.location='/viewdoctor';</script>''')
+    
+  
+class EditDoc(View):
+    def get(Self,Request,id):
+        doc=Doctor.objects.get(id=id)
+        return render(Request,'administrator/editdoctor.html',{'doc':doc})
+    def post(self, request, id):
+        # Fetch the doctor and their associated login record
+        doc = Doctor.objects.get(id=id)
+        login_info = Logintable.objects.get(id=doc.doctor_id.id)  # Assuming 'doctor_id' links to the Login table
+        
+        # Create a form with the doctor data from the request
+        form = DoctorForm(request.POST, instance=doc)
+        
+        if form.is_valid():
+            # Update the login details (username and password)
+            login_info.username = request.POST['email']
+            login_info.password = request.POST['password']
+            login_info.save()  # Save the updated login information
+            
+            # Save the doctor form, but don't commit yet
+            updated_doc = form.save(commit=False)
+            updated_doc.doctor_id = login_info  # Link the updated login_info back to the doctor
+            updated_doc.save()  # Save the doctor details
+            
+            # Redirect after saving, or return a success message
+            return HttpResponse('''<script>alert("Doctor details updated successfully!");window.location='/viewdoctor';</script>''')
+        else:
+            # Handle the case where the form is not valid
+            return render(request, 'administrator/editdoctor.html', {'doc': doc, 'login_info': login_info, 'form': form})
 class ViewDoc(View):
     def get(Self,Request):
         doc=Doctor.objects.all()
@@ -44,7 +86,7 @@ class ViewDoc(View):
 class ViewOrgReq(View):
     def get(Self,Request):
         orgreq=OrganRequest.objects.all()
-        return render(Request,'administrator/view org req.html',{'orgreq':orgreq})
+        return render(Request,'administrator/organrequest.html',{'org':orgreq})
         
     
 class AssignDoc(View):
@@ -54,7 +96,8 @@ class AssignDoc(View):
 class ViewOrgDon(View):
     def get(Self,Request):
         orgdon=OrganDonation.objects.all()
-        return render(Request,'administrator/view org don.html',{'orgdon':orgdon})
+        print(orgdon)
+        return render(Request,'administrator/vieworgandonation.html',{'orgdon':orgdon})
         
 
 class ManageHosLoc(View):
@@ -63,21 +106,27 @@ class ManageHosLoc(View):
     
 class ViewUserDet(View):
     def get(Self,Request):
-        userdet=User.objects.all()
-        return render(Request,'administrator/view user det.html',{'userdet':userdet})
+        userdet=Usertable.objects.all()
+        return render(Request,'administrator/view user details.html',{'userdet':userdet})
+class PatientList(View):
+    def get(Self,Request):
+        userdet=Usertable.objects.all()
+        return render(Request,'doctor/patient list.html',{'userdet':userdet})
 
     
 class AdminDash(View):
     def get(Self,Request):
-        return render(Request,'administrator/admin dashboard.html')
+        return render(Request,'administrator/admindashboard.html')
     
 class NewReq(View):
     def get(Self,Request):
-        return render(Request,'doctor/new request.html')
+        orgreq=OrganRequest.objects.all()
+        return render(Request,'doctor/new request.html',{'orgreq':orgreq})
     
 class OrganCo(View):
     def get(Self,Request):
-        return render(Request,'doctor/organ collection.html')    
+        orgdon=OrganDonation.objects.all()
+        return render(Request,'doctor/organ collection.html', {'orgdon':orgdon})    
     
 # class PatientList(View):
 #     def get(Self,Request):
@@ -99,20 +148,20 @@ class DocDash(View):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Login
-from .serializers import Loginserializer, Loginserializer, PatientListserializer, Userserializer
+from .models import Logintable
+from .serializers import Loginserializer, Loginserializer, Userserializer
 
 class LoginAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
-                login = Login.objects.get(pk=pk)
+                login = Logintable.objects.get(pk=pk)
                 serializer = Loginserializer(login)
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            except Login.DoesNotExist:
+            except Logintable.DoesNotExist:
                 return Response({'error': 'Login not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
-            logins = Login.objects.all()
+            logins = Logintable.objects.all()
             serializer = Loginserializer(logins, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -125,8 +174,8 @@ class LoginAPIView(APIView):
     
     def put(self, request, pk):
         try:
-            login = Login.objects.get(pk=pk)
-        except Login.DoesNotExist:
+            login = Logintable.objects.get(pk=pk)
+        except Logintable.DoesNotExist:
             return Response({'error': 'Login not found'}, status=status.HTTP_404_NOT_FOUND)
         
         serializer = Loginserializer(login, data=request.data, partial=True)
@@ -137,10 +186,10 @@ class LoginAPIView(APIView):
     
     def delete(self, request, pk):
         try:
-            login = Login.objects.get(pk=pk)
+            login = Logintable.objects.get(pk=pk)
             login.delete()
             return Response({'message': 'Login deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        except Login.DoesNotExist:
+        except Logintable.DoesNotExist:
             return Response({'error': 'Login not found'}, status=status.HTTP_404_NOT_FOUND)
         
 from rest_framework.views import APIView
@@ -193,20 +242,20 @@ class DoctorAPIView(APIView):
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import User
+from .models import Usertable
 from .serializers import Userserializer
 
 class UserAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
-                user = User.objects.get(pk=pk)
+                user = Usertable.objects.get(pk=pk)
                 serializer = Userserializer(user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            except User.DoesNotExist:
+            except Usertable.DoesNotExist:
                 return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
-            users = User.objects.all()
+            users = Usertable.objects.all()
             serializer = Userserializer(users, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
@@ -219,8 +268,8 @@ class UserAPIView(APIView):
     
     def put(self, request, pk):
         try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
+            user = Usertable.objects.get(pk=pk)
+        except Usertable.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         
         serializer = Userserializer(user, data=request.data, partial=True)
@@ -231,58 +280,11 @@ class UserAPIView(APIView):
     
     def delete(self, request, pk):
         try:
-            user = User.objects.get(pk=pk)
+            user = Usertable.objects.get(pk=pk)
             user.delete()
             return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        except User.DoesNotExist:
+        except Usertable.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import PatientList
-from .serializers import PatientListserializer
-
-class PatientListAPIView(APIView):
-    def get(self, request, pk=None):
-        if pk:
-            try:
-                patient = PatientList.objects.get(pk=pk)
-                serializer = PatientListserializer(patient)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            except PatientList.DoesNotExist:
-                return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            patients = PatientList.objects.all()
-            serializer = PatientListserializer(patients, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-    
-    def post(self, request):
-        serializer = PatientListserializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def put(self, request, pk):
-        try:
-            patient = PatientList.objects.get(pk=pk)
-        except PatientList.DoesNotExist:
-            return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        serializer = PatientListserializer(patient, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, pk):
-        try:
-            patient = PatientList.objects.get(pk=pk)
-            patient.delete()
-            return Response({'message': 'Patient deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        except PatientList.DoesNotExist:
-            return Response({'error': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -465,9 +467,9 @@ class LoginPageApi(APIView):
         username = request.data.get("username")
         print("Username ------------------> ",username)
         try:
-            user = Login.objects.filter(username=username, password=password).first()
+            user = Logintable.objects.filter(username=username, password=password).first()
             print("user_obj :-----------", user)
-        except Login.DoesNotExist:
+        except Logintable.DoesNotExist:
             response_dict["message"] = "No account found for this username. Please signup."
             return Response(response_dict, HTTP_200_OK)
       
