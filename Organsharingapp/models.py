@@ -18,6 +18,7 @@ class Usertable(models.Model):
     Login_id=models.ForeignKey(Logintable,on_delete=models.CASCADE,null=True,blank=True)
     user_name=models.CharField(max_length=100,null=True,blank=True)
     address=models.CharField(max_length=100,null=True,blank=True)
+    image=models.FileField(upload_to='profileimage',null=True,blank=True)
     phone_number=models.CharField(max_length=100,null=True,blank=True)
     email=models.CharField(max_length=100,null=True,blank=True)
     blood_group=models.CharField(max_length=100,null=True,blank=True)
@@ -35,6 +36,8 @@ class OrganDonation(models.Model):
 class OrganRequest(models.Model):
     patient_id=models.ForeignKey(Usertable,on_delete=models.CASCADE,null=True,blank=True)
     organ_id=models.ForeignKey(OrganDonation,on_delete=models.CASCADE,null=True,blank=True)
+    assigneddoctor=models.ForeignKey(Doctor,on_delete=models.CASCADE,null=True,blank=True)
+    created_at=models.DateTimeField(auto_now_add=True,null=True,blank=True)
 
 
 class Appointment(models.Model):

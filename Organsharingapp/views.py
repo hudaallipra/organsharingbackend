@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.http.response import HttpResponse
 from .forms import *
@@ -86,9 +86,20 @@ class ViewDoc(View):
 class ViewOrgReq(View):
     def get(Self,Request):
         orgreq=OrganRequest.objects.all()
-        return render(Request,'administrator/organrequest.html',{'org':orgreq})
+        doc=Doctor.objects.all()
+        return render(Request,'administrator/organrequest.html',{'org':orgreq,'doc':doc})
         
-    
+
+class organrequestupdate(View):
+    def post(self, request, id):
+        orgreq = get_object_or_404(OrganRequest, id=id)
+        doctor_id = request.POST.get('assigneddoctor')
+        if doctor_id:
+            doctor = get_object_or_404(Doctor, id=doctor_id)
+            orgreq.assigneddoctor = doctor
+            orgreq.save()
+            return redirect('organ request')
+
 class AssignDoc(View):
     def get(Self,Request):
         return render(Request,'administrator/assign doc.html')
@@ -149,7 +160,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Logintable
-from .serializers import Loginserializer, Loginserializer, Userserializer
+from .serializers import Loginserializer, Loginserializer, OrganRequestSerializer1, Userserializer
 
 class LoginAPIView(APIView):
     def get(self, request, pk=None):
@@ -249,7 +260,7 @@ class UserAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
-                user = Usertable.objects.get(pk=pk)
+                user = Usertable.objects.get(Login_id__pk=pk)
                 serializer = Userserializer(user)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             except Usertable.DoesNotExist:
@@ -468,9 +479,9 @@ class LoginPageApi(APIView):
         username = request.data.get("username")
         print("Username ------------------> ",username)
         try:
-            user = Login.objects.filter(username=username, password=password).first()
+            user = Logintable.objects.filter(username=username, password=password).first()
             print("user_obj :-----------", user)
-        except Login.DoesNotExist:
+        except Logintable.DoesNotExist:
             response_dict["message"] = "No account found for this username. Please signup."
             return Response(response_dict, HTTP_200_OK)
       
@@ -499,20 +510,23 @@ class organ_donor_list(APIView):
 
         for organ in organs:
             donations = OrganDonation.objects.filter(organ_type=organ)
+            print(donations)
 
             donors = []
             for donation in donations:
                 user = donation.user_id
+                # print(user)
                 donors.append({
+                    'donation_id': donation.id,
                     'id': user.id,
                     "user_name": user.user_name,
                     "age": user.age,
                     "email": user.email,
                     "phone_number": user.phone_number,
-                    "profile_image":request.build_absolute_uri(user.profile_image.url) if user.profile_image else None,
+                    "profile_image":request.build_absolute_uri(user.image.url) if user.image else None,
                     "address":user.address,
                     "gender":user.gender,
-                    "bloodgroup":user.bloodgroup,
+                    "bloodgroup":user.blood_group,
 
 
                     
@@ -524,6 +538,7 @@ class organ_donor_list(APIView):
                 "categoryid":organ.id,
                 "donors": donors
             })
+            print(data)
 
         return Response(data)
     
@@ -585,10 +600,14 @@ from .serializers import OrganRequestSerializer
 
 class OrganRequestAPIView(APIView):
 
-    def get(self, request):
-        
-        organ_requests = OrganRequest.objects.all()
-        serializer = OrganRequestSerializer(organ_requests, many=True)
+    def get(self, request, id=None):
+        if id is None:
+            organ_requests = OrganRequest.objects.all()
+        else:
+            organ_requests = OrganRequest.objects.filter(patient_id__Login_id__id=id)
+
+        serializer = OrganRequestSerializer1(organ_requests, many=True)
+        print(serializer.data)
         return Response(serializer.data)
 
     def post(self, request):

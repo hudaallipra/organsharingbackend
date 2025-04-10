@@ -9,6 +9,7 @@ urlpatterns = [
     path('editdoctor/<int:id>',EditDoc.as_view(),name='editdoctor'),
     path('viewdoctor', ViewDoc.as_view(), name='viewdoctor'),
     path('organ request', ViewOrgReq.as_view(), name='organ request'),
+    path('organrequestupdate/<int:id>',organrequestupdate.as_view(),name='organrequestupdate'),
     path('assign doc', AssignDoc.as_view(), name='assign doc'),
     path('view organ donation', ViewOrgDon.as_view(), name='view organ donation'),
     path('manage hospital location', ManageHosLoc.as_view(), name=' hospmanageital location'),
@@ -24,16 +25,17 @@ urlpatterns = [
     path('LoginPageApi', LoginAPIView.as_view(), name='loginapi'),
     path('doctorapi', DoctorAPIView.as_view(), name='doctorapi'),
     path('userapi', UserAPIView.as_view(), name='userapi'),
+    path('userapi/<int:pk>', UserAPIView.as_view(), name='userapi'),
     path('organdonationapi', OrganDonationAPIView.as_view(), name='organdonationapi'),
     path('organrequestapi', OrganRequestAPIView.as_view(), name='organrequestapi'),  # fixed typo in 'name'
     path('appointmentapi', AppointmentAPIView.as_view(), name='appointment'),
     path('donorregistrationapi',DonorRegistrationApi.as_view(),name='DonorRegistrationApi'),
     path('loginapi',LoginPageApi.as_view(),name='LoginPageApi'),
     #urls.py
-path('orgondonerlist', organ_donor_list.as_view(), name='organ-donor-list'),
+    path('orgondonerlist', organ_donor_list.as_view(), name='organ-donor-list'),
     # path('vieworgans',vieworgans.as_view(),name='vieworgans')
     path('organdonation', OrganDonationAPI.as_view()),  # GET & POST
     path('organdonation/<int:pk>', OrganDonationAPI.as_view()),  
     path('organrequest', OrganRequestAPIView.as_view()),  # for get & post
-    path('organrequest/<int:pk>', OrganRequestAPIView.as_view()),  # for put & delete
+    path('organrequest/<int:id>', OrganRequestAPIView.as_view()),  # for put & delete
 ]
