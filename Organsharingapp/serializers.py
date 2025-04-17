@@ -1,5 +1,6 @@
 from  rest_framework.serializers import ModelSerializer
 from .models import *
+from rest_framework import serializers
 
 class Loginserializer(ModelSerializer):
     class Meta:
@@ -32,8 +33,17 @@ class OrganRequestserializer(ModelSerializer):
 class Appointmentserializer(ModelSerializer):
     class Meta:
         model=Appointment
-        fields=['patient_id','doctor_id','date','time','status']
+        fields=['patient_id','doctor_id','appointment_date','appointment_time','status']
+class AppointmentSerializer1(ModelSerializer):
+    doctor_name= serializers.CharField(source='doctor_id.doctor_name')
+    class Meta:
+        model = Appointment
+        fields = ['id', 'patient_id', 'doctor_id', 'appointment_date', 'appointment_time', 'status','doctor_name','prescriptions','next_visit_date']
 
+class AppointmentSerializer(ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['id', 'patient_id', 'doctor_id', 'appointment_date', 'appointment_time', 'status']
 from rest_framework import serializers
 from .models import OrganDonation
 
@@ -49,7 +59,7 @@ from .models import OrganRequest
 class OrganRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganRequest
-        fields = ['patient_id','organ_id']
+        fields = ['patient_id','organ_id','file']
 
 from rest_framework import serializers
 

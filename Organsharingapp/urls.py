@@ -20,6 +20,8 @@ urlpatterns = [
     path('patient list', PatientList.as_view(), name='patient list'),
     path('schedule appointments', Sched.as_view(), name='schedule appointments'),
     path('doctor dashboard', DocDash.as_view(), name='doctor dashboard'),
+    path('organrequestaccept/<int:id>/',organrequestaccept.as_view(),name='organrequestaccept'),
+    path('organrequestreject/<int:id>/',organrequestreject.as_view(),name='organrequestreject'),
 
     # API endpoints
     path('LoginPageApi', LoginAPIView.as_view(), name='loginapi'),
@@ -38,4 +40,9 @@ urlpatterns = [
     path('organdonation/<int:pk>', OrganDonationAPI.as_view()),  
     path('organrequest', OrganRequestAPIView.as_view()),  # for get & post
     path('organrequest/<int:id>', OrganRequestAPIView.as_view()),  # for put & delete
+    path('appointments/<int:pk>/', AppointmentDetail.as_view(), name='appointment-detail'),
+    path('OrganDonorRequestAPIView/<int:id>',OrganDonorRequestAPIView.as_view(),name='OrganDonorRequestAPIView'),
+    path('Appointmentlist',Appointmentlist.as_view(),name='Appointmentlist'),
+    path('Appointmentupdate/<int:id>',Appointmentupdate.as_view(),name='Appointmentupdate'),
+
 ]

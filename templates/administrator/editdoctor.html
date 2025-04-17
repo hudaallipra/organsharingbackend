@@ -9,8 +9,8 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="text-center">Add Doctor</h2>
-        <form class="mt-4" action="#" method="post">
+        <h2 class="text-center">Edit Doctor</h2>
+        <form class="mt-4" action="" method="post">
             {% csrf_token %}
 
             <div class="mb-3">
@@ -23,7 +23,11 @@
             </div>
             <div class="mb-3">
                 <label for="specialization" class="form-label">Specialization</label>
-                <input type="text" class="form-control" id="specialization" name="specialization" value="{{doc.specialization}}" required>
+                <select name="specialization" id="specialization" class="form-control" required>
+                    {% for specialization in org %}
+                        <option value="{{specialization.id}}" {% if specialization.id == doc.specialization %}selected{% endif %}>{{specialization.organ_name}}</option>
+                    {% endfor %}
+                <!-- <input type="text" class="form-control" id="specialization" name="specialization" value="{{doc.specialization}}" required> -->
             </div>
             <div class="mb-3">
                 <label for="phoneNumber" class="form-label">Phone Number</label>

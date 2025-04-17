@@ -145,7 +145,12 @@
                 </div>
                 <div class="mb-3">
                     <label for="specialization" class="form-label">Specialization</label>
-                    <input type="text" class="form-control" id="specialization" name="specialization" required>
+                    <select name="specialization" id="">
+                        {% for specialization in org %}
+                        <option value="{{specialization.id}}">{{specialization.organ_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- <input type="text" class="form-control" id="specialization" name="specialization" required> -->
                 </div>
                 <div class="mb-3">
                     <label for="phoneNumber" class="form-label">Phone Number</label>

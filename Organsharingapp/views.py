@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.http.response import HttpResponse
@@ -30,8 +31,10 @@ class Loginpage(View):
         except Logintable.DoesNotExist:
             return HttpResponse('''<script>alert("invalid username or password");window.location=/</script>''')
 class AddDoc(View):
-    def get(Self,Request):
-        return render(Request,'administrator/add doctor.html')
+    def get(Self,request):
+        org=Organ.objects.all()
+
+        return render(request,'administrator/add doctor.html',{'org':org})
     def post(self,request):
         form=DoctorForm(request.POST)
         if form.is_valid():
@@ -43,16 +46,17 @@ class AddDoc(View):
         return HttpResponse('''<script>alert("Doctor added successfully");window.location='/viewdoctor';</script>''')
 
 class DeleteDoc(View):
-    def get(Self,Request,id):
+    def get(Self,request,id):
         doc=Doctor.objects.get(id=id)
         doc.delete()
         return HttpResponse('''<script>alert("Doctor deleted successfully");window.location='/viewdoctor';</script>''')
     
   
 class EditDoc(View):
-    def get(Self,Request,id):
+    def get(Self,request,id):
+        org=Organ.objects.all()
         doc=Doctor.objects.get(id=id)
-        return render(Request,'administrator/editdoctor.html',{'doc':doc})
+        return render(request,'administrator/editdoctor.html',{'doc':doc,'org':org})
     def post(self, request, id):
         # Fetch the doctor and their associated login record
         doc = Doctor.objects.get(id=id)
@@ -78,21 +82,21 @@ class EditDoc(View):
             # Handle the case where the form is not valid
             return render(request, 'administrator/editdoctor.html', {'doc': doc, 'login_info': login_info, 'form': form})
 class ViewDoc(View):
-    def get(Self,Request):
+    def get(Self,request):
         doc=Doctor.objects.all()
-        return render(Request,'administrator/view doctor.html',{'doc':doc})
+        return render(request,'administrator/view doctor.html',{'doc':doc})
 
     
 class ViewOrgReq(View):
-    def get(Self,Request):
-        orgreq=OrganRequest.objects.all()
+    def get(Self,request):
+        orgreq=Organrequest.objects.all()
         doc=Doctor.objects.all()
-        return render(Request,'administrator/organrequest.html',{'org':orgreq,'doc':doc})
+        return render(request,'administrator/organrequest.html',{'org':orgreq,'doc':doc})
         
 
 class organrequestupdate(View):
     def post(self, request, id):
-        orgreq = get_object_or_404(OrganRequest, id=id)
+        orgreq = get_object_or_404(Organrequest, id=id)
         doctor_id = request.POST.get('assigneddoctor')
         if doctor_id:
             doctor = get_object_or_404(Doctor, id=doctor_id)
@@ -101,55 +105,57 @@ class organrequestupdate(View):
             return redirect('organ request')
 
 class AssignDoc(View):
-    def get(Self,Request):
-        return render(Request,'administrator/assign doc.html')
+    def get(Self,request):
+        return render(request,'administrator/assign doc.html')
     
 class ViewOrgDon(View):
-    def get(Self,Request):
+    def get(Self,request):
         orgdon=OrganDonation.objects.all()
         print(orgdon)
-        return render(Request,'administrator/vieworgandonation.html',{'orgdon':orgdon})
+        return render(request,'administrator/vieworgandonation.html',{'orgdon':orgdon})
         
 
 class ManageHosLoc(View):
-    def get(Self,Request):
-        return render(Request,'administrator/manage hospital location.html')
+    def get(Self,request):
+        return render(request,'administrator/manage hospital location.html')
     
 class ViewUserDet(View):
-    def get(Self,Request):
+    def get(Self,request):
         userdet=Usertable.objects.all()
-        return render(Request,'administrator/view user details.html',{'userdet':userdet})
+        return render(request,'administrator/view user details.html',{'userdet':userdet})
 class PatientList(View):
-    def get(Self,Request):
+    def get(Self,request):
         userdet=Usertable.objects.all()
-        return render(Request,'doctor/patient list.html',{'userdet':userdet})
+        return render(request,'doctor/patient list.html',{'userdet':userdet})
 
     
 class AdminDash(View):
-    def get(Self,Request):
-        return render(Request,'administrator/admindashboard.html')
+    def get(Self,request):
+        return render(request,'administrator/admindashboard.html')
     
 class NewReq(View):
-    def get(Self,Request):
-        orgreq=OrganRequest.objects.all()
-        return render(Request,'doctor/new request.html',{'orgreq':orgreq})
+    def get(Self,request):
+        userid=request.session['userid']
+        doc=Doctor.objects.get(doctor_id=userid)
+        orgreq=OrganRequest.objects.filter(organ_id__organ_type__id=doc.specialization.id).all()
+        return render(request,'doctor/new request.html',{'orgreq':orgreq})
     
 class OrganCo(View):
-    def get(Self,Request):
+    def get(Self,request):
         orgdon=OrganDonation.objects.all()
-        return render(Request,'doctor/organ collection.html', {'orgdon':orgdon})    
+        return render(request,'doctor/organ collection.html', {'orgdon':orgdon})    
     
 # class PatientList(View):
-#     def get(Self,Request):
-#         return render(Request,'doctor/patient list.html')
+#     def get(Self,request):
+#         return render(request,'doctor/patient list.html')
 
 class Sched(View):
-    def get(Self,Request):
-        return render(Request,'doctor/schedule appointments.html')  
+    def get(Self,request):
+        return render(request,'doctor/schedule appointments.html')  
 
 class DocDash(View):
-    def get(Self,Request):
-        return render(Request,'doctor/doctor dashboard.html')         
+    def get(Self,request):
+        return render(request,'doctor/doctor dashboard.html')         
     
 
     # ..........................................................api
@@ -160,7 +166,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Logintable
-from .serializers import Loginserializer, Loginserializer, OrganRequestSerializer1, Userserializer
+from .serializers import AppointmentSerializer, Appointmentserializer, AppointmentSerializer1, Loginserializer, Loginserializer, OrganRequestSerializer1, Userserializer
 
 class LoginAPIView(APIView):
     def get(self, request, pk=None):
@@ -348,24 +354,24 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import OrganRequest
-from .serializers import OrganRequestserializer
+from .serializers import OrganRequestSerializer
 
-class OrganRequestAPIView(APIView):
+class OrganrequestAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
                 request_obj = OrganRequest.objects.get(pk=pk)
-                serializer = OrganRequestserializer(request_obj)
+                serializer = OrganRequestSerializer(request_obj)
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            except OrganRequest.DoesNotExist:
+            except Organrequest.DoesNotExist:
                 return Response({'error': 'Organ request not found'}, status=status.HTTP_404_NOT_FOUND)
         else:
             requests = OrganRequest.objects.all()
-            serializer = OrganRequestserializer(requests, many=True)
+            serializer = OrganRequestSerializer(requests, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
     
     def post(self, request):
-        serializer = OrganRequestserializer(data=request.data)
+        serializer = OrganRequestSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -377,7 +383,7 @@ class OrganRequestAPIView(APIView):
         except OrganRequest.DoesNotExist:
             return Response({'error': 'Organ request not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = OrganRequestserializer(request_obj, data=request.data, partial=True)
+        serializer = Organrequestserializer(request_obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -388,7 +394,7 @@ class OrganRequestAPIView(APIView):
             request_obj = OrganRequest.objects.get(pk=pk)
             request_obj.delete()
             return Response({'message': 'Organ request deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
-        except OrganRequest.DoesNotExist:
+        except Organrequest.DoesNotExist:
             return Response({'error': 'Organ request not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -642,3 +648,130 @@ class OrganRequestAPIView(APIView):
 
         organ_request.delete()
         return Response({"message": "Deleted Successfully"}, status=status.HTTP_204_NO_CONTENT)
+class OrganDonorRequestAPIView(APIView):
+
+    def get(self, request, id=None):
+        if id is None:
+            organ_requests = OrganRequest.objects.all()
+        else:
+            organ_requests = OrganRequest.objects.filter(organ_id__user_id__Login_id__id=id)
+
+        serializer = OrganRequestSerializer1(organ_requests, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
+
+class AppointmentDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Appointment.objects.get(patient_id__Login_id__pk=pk)
+        except Appointment.DoesNotExist:
+            raise Http404
+    def post(self, request, pk):
+        print(request.data)
+        try:
+            orgreq = OrganRequest.objects.get(id=request.data.get('request_id'))
+            print(orgreq)
+            if not orgreq.assigneddoctor:
+                return Response({"error": "No assigned doctor"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            docid = orgreq.assigneddoctor
+            print(docid)
+            app = Appointment()
+            app.doctor_id = docid
+            app.patient_id = orgreq.patient_id
+            app.status = 'pending'
+            app.save()
+            serializer = AppointmentSerializer(app)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except OrganRequest.DoesNotExist:
+            return Response({"error": "Organ request Not Found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    def get(self, request, pk):
+        appointment = Appointment.objects.filter(patient_id__Login_id__pk=pk).all()
+        serializer = AppointmentSerializer1(appointment,many=True)
+        return Response(serializer.data)
+    
+    def put(self, request, pk):
+        appointment = self.get_object(pk)
+        serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        appointment = self.get_object(pk)
+        appointment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+from datetime import datetime  
+class Appointmentlist(View):
+    def get(self, request):
+        app = Appointment.objects.all()
+        # Preprocess appointments to ensure correct date/time format
+        formatted_app = []
+        for appointment in app:
+            # Handle appointment_date
+            date_str = appointment.appointment_date
+            date_str1 = appointment.next_visit_date
+            
+            try:
+                # Try parsing the date if it's in a known format, e.g., "DD/MM/YYYY" or similar
+                parsed_date = datetime.strptime(date_str, '%d/%m/%Y')  # Adjust format as per your data
+                formatted_date = parsed_date.strftime('%Y-%m-%d')
+            except (ValueError, TypeError):
+                # If parsing fails or date is empty, use the original string or empty
+                formatted_date = date_str if date_str else ''
+
+            try:
+                # Try parsing the date if it's in a known format, e.g., "DD/MM/YYYY" or similar
+                parsed_date1 = datetime.strptime(date_str1, '%d/%m/%Y')  # Adjust format as per your data
+                formatted_date1 = parsed_date1.strftime('%Y-%m-%d')
+            except (ValueError, TypeError):
+                # If parsing fails or date is empty, use the original string or empty
+                formatted_date1 = date_str1 if date_str1 else ''
+    
+            # Handle appointment_time
+            time_str = appointment.appointment_time
+            try:
+                # Try parsing the time if it's in a known format, e.g., "HH:MM AM/PM"
+                parsed_time = datetime.strptime(time_str, '%I:%M %p')  # Adjust format as per your data
+                formatted_time = parsed_time.strftime('%H:%M')
+            except (ValueError, TypeError):
+                # If parsing fails or time is empty, use the original string or empty
+                formatted_time = time_str if time_str else ''
+
+            formatted_app.append({
+                'appointment': appointment,
+                'formatted_date': formatted_date,
+                'formatted_time': formatted_time,
+                'formatted_date1': formatted_date1,
+            })
+
+        return render(request, 'doctor/appointmentlist.html', {'app': formatted_app})
+class Appointmentupdate(View):
+    def post(self,request,id):
+        app=Appointment.objects.get(id=id)
+        app.appointment_date=request.POST.get('appointment_date')
+        app.appointment_time=request.POST.get('appointment_time')
+        app.prescriptions=request.POST.get('prescriptions')
+        app.next_visit_date=request.POST.get('next_visit_date')
+        app.status='accepted'
+        app.save()
+        return HttpResponse('''<script>alert("Prescription added successfully");window.location='/Appointmentlist';</script>''')
+    
+
+class organrequestaccept(View):
+    def get(self, request, id):
+        orgreq = get_object_or_404(Organrequest, id=id)
+        orgreq.status = 'accepted'
+        orgreq.save()
+        return redirect('new request')
+
+class organrequestreject(View):
+    def get(self, request, id):
+        orgreq = get_object_or_404(OrganRequest, id=id)
+        orgreq.status = 'rejected'
+        orgreq.save()
+        return redirect('new request')
