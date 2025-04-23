@@ -127,7 +127,7 @@
                                 {% csrf_token %}
                                 <select name="assigneddoctor">
                                     {% for doctor in doc %}
-                                    <option value="{{ doctor.id }}">{{ doctor.doctor_name }}</option>
+                                    <option value="{{ doctor.id }}">{{ doctor.doctor_name }}({{doctor.specialization.organ_name}})</option>
                                     {% endfor %}
                                 </select>
                                 <button type="submit" class="btn btn-primary">Assign</button>

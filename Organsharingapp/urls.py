@@ -22,6 +22,7 @@ urlpatterns = [
     path('doctor dashboard', DocDash.as_view(), name='doctor dashboard'),
     path('organrequestaccept/<int:id>/',organrequestaccept.as_view(),name='organrequestaccept'),
     path('organrequestreject/<int:id>/',organrequestreject.as_view(),name='organrequestreject'),
+    path('add_medicine/<int:id>', MedicineFormView.as_view(), name='add_medicine'),
 
     # API endpoints
     path('LoginPageApi', LoginAPIView.as_view(), name='loginapi'),

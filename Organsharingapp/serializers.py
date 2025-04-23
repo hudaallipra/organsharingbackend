@@ -38,7 +38,7 @@ class AppointmentSerializer1(ModelSerializer):
     doctor_name= serializers.CharField(source='doctor_id.doctor_name')
     class Meta:
         model = Appointment
-        fields = ['id', 'patient_id', 'doctor_id', 'appointment_date', 'appointment_time', 'status','doctor_name','prescriptions','next_visit_date']
+        fields = ['id', 'patient_id', 'doctor_id', 'appointment_date', 'appointment_time', 'status','doctor_name','prescription_file','next_visit_date']
 
 class AppointmentSerializer(ModelSerializer):
     class Meta:
@@ -67,6 +67,10 @@ class OrganRequestSerializer1(serializers.ModelSerializer):
     organ_name = serializers.CharField(source='organ_id.organ_type.organ_name')
     organ_donor_name = serializers.CharField(source='organ_id.user_id.user_name')
     doctor_name = serializers.CharField(source='assigneddoctor.doctor_name', allow_null=True)
+    patient_name = serializers.CharField(source='patient_id.user_name') 
+    doctor_phone=serializers.CharField(source='assigneddoctor.phone') 
+    user_phone=serializers.CharField(source='patient_id.phone_number')
+    
 
     class Meta:
         model = OrganRequest

@@ -89,14 +89,14 @@ class ViewDoc(View):
     
 class ViewOrgReq(View):
     def get(Self,request):
-        orgreq=Organrequest.objects.all()
+        orgreq=OrganRequest.objects.all()
         doc=Doctor.objects.all()
         return render(request,'administrator/organrequest.html',{'org':orgreq,'doc':doc})
         
 
 class organrequestupdate(View):
     def post(self, request, id):
-        orgreq = get_object_or_404(Organrequest, id=id)
+        orgreq = get_object_or_404(OrganRequest, id=id)
         doctor_id = request.POST.get('assigneddoctor')
         if doctor_id:
             doctor = get_object_or_404(Doctor, id=doctor_id)
@@ -136,13 +136,17 @@ class AdminDash(View):
 class NewReq(View):
     def get(Self,request):
         userid=request.session['userid']
-        doc=Doctor.objects.get(doctor_id=userid)
-        orgreq=OrganRequest.objects.filter(organ_id__organ_type__id=doc.specialization.id).all()
+        print(userid)
+        doc=Doctor.objects.get(doctor_id__id=userid)
+        orgreq=OrganRequest.objects.filter(assigneddoctor__id=doc.id).all()
         return render(request,'doctor/new request.html',{'orgreq':orgreq})
     
 class OrganCo(View):
     def get(Self,request):
-        orgdon=OrganDonation.objects.all()
+        userid = request.session.get('userid')
+        specialization = Doctor.objects.get(doctor_id__id=userid).specialization.id
+        print(specialization)
+        orgdon=OrganDonation.objects.filter(organ_type__id=specialization).all()
         return render(request,'doctor/organ collection.html', {'orgdon':orgdon})    
     
 # class PatientList(View):
@@ -157,7 +161,9 @@ class DocDash(View):
     def get(Self,request):
         return render(request,'doctor/doctor dashboard.html')         
     
-
+class addprescription(View):
+    def get(Self,request):
+        return render(request,'doctor/addprescription.html')
     # ..........................................................api
 
 
@@ -708,7 +714,7 @@ class AppointmentDetail(APIView):
 from datetime import datetime  
 class Appointmentlist(View):
     def get(self, request):
-        app = Appointment.objects.all()
+        app = Appointment.objects.filter(doctor_id__doctor_id__id=request.session['userid']).all()
         # Preprocess appointments to ensure correct date/time format
         formatted_app = []
         for appointment in app:
@@ -756,7 +762,7 @@ class Appointmentupdate(View):
         app.appointment_date=request.POST.get('appointment_date')
         app.appointment_time=request.POST.get('appointment_time')
         app.prescriptions=request.POST.get('prescriptions')
-        app.next_visit_date=request.POST.get('next_visit_date')
+        # app.next_visit_date=request.POST.get('next_visit_date')
         app.status='accepted'
         app.save()
         return HttpResponse('''<script>alert("Prescription added successfully");window.location='/Appointmentlist';</script>''')
@@ -764,7 +770,7 @@ class Appointmentupdate(View):
 
 class organrequestaccept(View):
     def get(self, request, id):
-        orgreq = get_object_or_404(Organrequest, id=id)
+        orgreq = get_object_or_404(OrganRequest, id=id)
         orgreq.status = 'accepted'
         orgreq.save()
         return redirect('new request')
@@ -775,3 +781,98 @@ class organrequestreject(View):
         orgreq.status = 'rejected'
         orgreq.save()
         return redirect('new request')
+
+from django.views import View
+from django.http import HttpResponse
+from django.shortcuts import render
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from django.core.files.base import ContentFile
+from io import BytesIO
+
+class MedicineFormView(View):
+    def get(self, request,id):
+        appid=id
+        appid=Appointment.objects.get(id=id)
+        print(appid.patient_id.user_name)
+        return render(request, 'doctor/medicine_form.html',{'appid':appid})
+    
+    def post(self, request,id):
+        appid=id
+        print(request.POST)
+        try:
+            appointment = Appointment.objects.get(id=id)
+        except Appointment.DoesNotExist:
+            return render(request, 'error.html', {'message': 'Appointment not found'}, status=404)
+        medicines = []
+        index = 0
+        while f'medicine_name_{index}' in request.POST:
+            medicine = {
+                'name': request.POST.get(f'medicine_name_{index}', ''),
+                'dosage': request.POST.get(f'dosage_{index}', ''),
+                'frequency': request.POST.get(f'frequency_{index}', ''),
+                'notes': request.POST.get(f'notes_{index}', '')
+            }
+            medicines.append(medicine)
+            index += 1
+        if 'generate_pdf' in request.POST:
+            # Generate PDF
+            buffer = BytesIO()
+            p = canvas.Canvas(buffer, pagesize=letter)
+            p.setFont("Helvetica", 12)
+            y = 750
+            
+            # Add patient and prescription details
+            p.drawString(100, y, "Prescription Details")
+            y -= 30
+            p.drawString(100, y, f"Patient Name: {appointment.patient_id.user_name}")
+            y -= 20
+            p.drawString(100, y, f"Age: {appointment.patient_id.age}")
+            y -= 20
+            p.drawString(100, y, f"Prescription Date: {request.POST.get('prescription_date', '')}")
+            y -= 20
+            p.drawString(100, y, f"Next Visit Date: {request.POST.get('next_visit_date', '')}")
+            y -= 40
+            
+            # Add medicine details
+            p.drawString(100, y, "Medicine Details")
+            y -= 20
+            for i, med in enumerate(medicines, 1):
+                p.drawString(100, y, f"Medicine {i}:")
+                p.drawString(120, y - 20, f"Name: {med['name']}")
+                p.drawString(120, y - 40, f"Dosage: {med['dosage']}")
+                p.drawString(120, y - 60, f"Frequency: {med['frequency']}")
+                p.drawString(120, y - 80, f"Notes: {med['notes'] or 'None'}")
+                y -= 120
+                if y < 100:
+                    p.showPage()
+                    p.setFont("Helvetica", 12)
+                    y = 750
+            
+            p.showPage()
+            p.save()
+            buffer.seek(0)
+            pdf_data = buffer.getvalue()
+            buffer.close()
+
+            # Save PDF to appointment's prescription_file
+            pdf_file = ContentFile(pdf_data, name=f'prescription_{id}.pdf')
+            appointment.prescription_file.save(pdf_file.name, pdf_file)
+            appointment.prescriptions = '; '.join(
+                [f"{med['name']} ({med['dosage']}, {med['frequency']})" for med in medicines]
+            )
+            appointment.next_visit_date = request.POST.get('next_visit_date', '')
+            appointment.save()
+
+            # Redirect to appointment list
+            return redirect('Appointmentlist') 
+            
+        # Render confirmation page
+        context = {
+            'prescription_date': request.POST.get('prescription_date', ''),
+            'next_visit_date': request.POST.get('next_visit_date', ''),
+            'appid': appid,
+            'medicines': medicines,
+            'message': f'{len(medicines)} medicine(s) submitted successfully!'
+        }
+        return render(request, 'doctor/medicine_confirmation.html', context)

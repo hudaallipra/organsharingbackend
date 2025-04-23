@@ -211,21 +211,22 @@
 <body>
     <div class="container-fluid">
         <div class="card">
-            <h2>Patient List</h2>
+            <h2>Appointment List</h2>
             <table class="table">
                 <thead>
                     <tr>
                         <th scope="col">Patient ID</th>
                         <th scope="col">Patient Name</th>
-                        <th scope="col">Blood Group</th>
+                        <!-- <th scope="col">Blood Group</th> -->
                         <th scope="col">Age</th>
-                        <th scope="col">Gender</th>
-                        <th scope="col">Email</th>
+                        <!-- <th scope="col">Gender</th> -->
+                        <!-- <th scope="col">Email</th> -->
                         <th scope="col">Phone</th>
                         <th scope="col">Appointment Date</th>
                         <th scope="col">Appointment Time</th>
-                        <th scope="col">Prescriptions</th>
-                        <th>Next Time To Visit</th>
+                        <th scope="col">View Prescriptions</th>
+                        <th scope="col">Add Prescriptions</th>
+
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
@@ -233,11 +234,11 @@
                     {% for item in app %}
 <tr>
     <td>{{ item.appointment.patient_id.id|escape }}</td>
-    <td>{{ item.appointment.patient_id.user_name|escape }}</td>
-    <td>{{ item.appointment.patient_id.blood_group|escape }}</td>
+    <td>{{ item.appointment.patient_id.user_name|escape }}</td> -->
+    {%comment%}<td>{{ item.appointment.patient_id.blood_group|escape }}</td>{%endcomment%}
     <td>{{ item.appointment.patient_id.age|escape }}</td>
-    <td>{{ item.appointment.patient_id.gender|escape }}</td>
-    <td>{{ item.appointment.patient_id.email|escape }}</td>
+    {%comment%}<td>{{ item.appointment.patient_id.gender|escape }}</td>
+    <td>{{ item.appointment.patient_id.email|escape }}</td>{%endcomment%}
     <td>{{ item.appointment.patient_id.phone_number|escape }}</td>
 
     <td>
@@ -254,18 +255,17 @@
                form="form-{{ item.appointment.id }}" 
                required>
     </td>
+    
     <td>
-        <textarea name="prescriptions" 
-                  maxlength="400" 
-                  form="form-{{ item.appointment.id }}">{{ item.appointment.prescriptions|escape }}</textarea>
-    </td>
+        {% if item.appointment.prescription_file %}
+            <a href="{{ item.appointment.prescription_file.url }}" target="_blank">View</a>
+        {% else %}
+            No Prescription
+        {% endif %}
     <td>
-        <input type="date" 
-               name="next_visit_date" 
-               value="{{ item.formatted_date1 }}" 
-               form="form-{{ item.appointment.id }}" 
-               required>
+        <a href="/add_medicine/{{item.appointment.id}}"><button>Add Prescription</button></a>
     </td>
+
     <td>
         <form action="{% url 'Appointmentupdate' item.appointment.id %}" method="post" id="form-{{ item.appointment.id }}">
             {% csrf_token %}

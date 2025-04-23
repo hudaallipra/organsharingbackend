@@ -51,3 +51,4 @@ class Appointment(models.Model):
     status = models.CharField(max_length=100, null=True, blank=True)
     next_visit_date=models.CharField(max_length=100,null=True,blank=True)
     prescriptions=models.CharField(max_length=400,null=True,blank=True)
+    prescription_file=models.FileField(upload_to='prescriptions',null=True,blank=True)
